@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subdomain Generator From Wildcard</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #00ff66;
+            --accent-hover: #00cc52;
+            --danger-color: #ff4444;
+            --danger-hover: #cc3333;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-color: #2e2e2e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .options-panel {
+            background-color: #181818;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="number"] {
+            background-color: #151515;
+            color: #e0e0e0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .words-panel {
+            background-color: #181818;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .words-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .words-panel-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .word-count-badge {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            background: rgba(0,255,102,0.1);
+            border: 1px solid rgba(0,255,102,0.3);
+            border-radius: 12px;
+            padding: 2px 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            background-color: #151515;
+            color: #e0e0e0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .line-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-action {
+            background-color: var(--accent-color);
+            color: #121212;
+        }
+
+        .btn-action:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-secondary {
+            background-color: #333333;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #444444;
+        }
+
+        .output-area {
+            width: 100%;
+            height: 260px;
+            background-color: #151515;
+            color: #e0e0e0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar-wrap {
+            background: #2e2e2e;
+            border-radius: 4px;
+            height: 6px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar-wrap.visible { display: block; }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.2s ease;
+            border-radius: 4px;
+        }
+
+        .toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 12px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Subdomain Generator From Wildcard</h2>
+        <p class="subtitle">Generate subdomain lists from a word bank. Combines single words, hyphenated pairs, and numeric suffixes until the target count is reached.</p>
+
+        <!-- Domain & count inputs -->
+        <div class="options-panel">
+            <div class="options-title">Configuration</div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="domainSuffix">Domain Suffix</label>
+                    <input type="text" id="domainSuffix" placeholder="e.g. example.com" value="example.com">
+                </div>
+                <div class="input-group" style="max-width: 180px;">
+                    <label for="targetCount">Target Subdomain Count</label>
+                    <input type="number" id="targetCount" placeholder="e.g. 500" min="1" max="100000" value="18000">
+                </div>
+            </div>
+        </div>
+
+        <!-- Word bank -->
+        <div class="words-panel">
+            <div class="words-panel-header">
+                <span class="words-panel-title">Word Bank</span>
+                <span class="word-count-badge" id="wordCountBadge">0 words</span>
+            </div>
+            <textarea id="wordBank" placeholder="One word per line…"></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-action" onclick="generate()">Generate Subdomains</button>
+            <button class="btn-secondary" onclick="resetWordBank()">Reset Words to Default</button>
+            <button class="btn-danger" onclick="resetAll()">Reset All</button>
+        </div>
+
+        <div class="progress-bar-wrap" id="progressWrap">
+            <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+
+        <div class="section-title">
+            <span>Generated Subdomains</span>
+            <span class="line-count" id="outputCount">Lines: 0</span>
+        </div>
+        <textarea class="output-area" id="outputText" readonly placeholder="Subdomains will appear here…"></textarea>
+
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <div id="toastNotification" class="toast">Copied to clipboard!</div>
+
+    <script>
+        const CAT_WORDS = [
+            // cat-themed
+            'cat', 'box', 'class', 'paw', 'meow', 'nap', 'claw', 'purr',
+            'kit', 'fur', 'mew', 'tab', 'yarn', 'pounce', 'hiss', 'fluff',
+            'catnip', 'whisker', 'tail', 'scratch', 'leap', 'prowl', 'den',
+            'catclass', 'feline', 'kitty', 'mewl', 'scruff', 'purrfect', 'catty', 'cattitude',
+            // education & school
+            'study', 'learn', 'lesson', 'lecture', 'course', 'grade', 'school',
+            'campus', 'class', 'tutor', 'homework', 'quiz', 'exam', 'test',
+            'notes', 'review', 'prep', 'syllabus', 'reading', 'essay', 'project',
+            'student', 'scholar', 'faculty', 'library', 'lab', 'seminar', 'workshop',
+            // university & academia
+            'uni', 'college', 'academy', 'institute', 'degree', 'diploma',
+            'thesis', 'research', 'paper', 'journal', 'faculty', 'dept',
+            'undergrad', 'grad', 'phd', 'masters', 'honors', 'dean', 'prof',
+            // mathematics
+            'math', 'calc', 'algebra', 'geometry', 'stats', 'logic', 'proof',
+            'theorem', 'formula', 'equation', 'matrix', 'vector', 'function',
+            'graph', 'limit', 'integral', 'prime', 'digit', 'ratio', 'factor',
+            'fraction', 'decimal', 'modulo', 'root', 'power', 'series', 'sum',
+            // science & stem
+            'physics', 'chem', 'bio', 'science', 'stem', 'data', 'code',
+            'lab', 'theory', 'model', 'atom', 'cell', 'orbit', 'wave',
+            'energy', 'force', 'mass', 'volt', 'byte', 'algo', 'syntax',
+            // writing & humanities
+            'prose', 'syntax', 'grammar', 'vocab', 'lit', 'history',
+            'geo', 'civics', 'arts', 'music', 'debate', 'speech', 'logic',
+        ];
+
+        function getWords() {
+            const raw = document.getElementById('wordBank').value;
+            return [...new Set(
+                raw.split('\n').map(w => w.trim().toLowerCase()).filter(w => w.length > 0)
+            )];
+        }
+
+        function updateWordCount() {
+            const count = getWords().length;
+            document.getElementById('wordCountBadge').textContent = count + ' words';
+        }
+
+        function setProgress(pct) {
+            document.getElementById('progressFill').style.width = pct + '%';
+        }
+
+        function* generateCandidates(words, suffix) {
+            // 1. single words
+            for (const w of words) {
+                yield `${w}.${suffix}`;
+            }
+            // 2. two-word hyphenated pairs
+            for (const a of words) {
+                for (const b of words) {
+                    if (a !== b) yield `${a}-${b}.${suffix}`;
+                }
+            }
+            // 3. single word + number (1, 2, 3, …)
+            let n = 1;
+            while (true) {
+                for (const w of words) {
+                    yield `${w}${n}.${suffix}`;
+                }
+                n++;
+            }
+        }
+
+        function generate() {
+            const suffix = document.getElementById('domainSuffix').value.trim();
+            const target = parseInt(document.getElementById('targetCount').value, 10);
+
+            if (!suffix) { alert('Please enter a domain suffix.'); return; }
+            if (!target || target < 1) { alert('Please enter a valid target count.'); return; }
+
+            const words = getWords();
+            if (words.length === 0) { alert('Word bank is empty.'); return; }
+
+            const progressWrap = document.getElementById('progressWrap');
+            progressWrap.classList.add('visible');
+            setProgress(0);
+
+            const results = [];
+            const seen = new Set();
+            const gen = generateCandidates(words, suffix);
+
+            // Use chunked processing so UI can update for large counts
+            function processChunk() {
+                const chunkSize = 5000;
+                for (let i = 0; i < chunkSize && results.length < target; i++) {
+                    const { value, done } = gen.next();
+                    if (done) break;
+                    if (!seen.has(value)) {
+                        seen.add(value);
+                        results.push(value);
+                    }
+                }
+
+                const pct = Math.min(100, Math.round((results.length / target) * 100));
+                setProgress(pct);
+
+                if (results.length < target) {
+                    requestAnimationFrame(processChunk);
+                } else {
+                    document.getElementById('outputText').value = results.join(',\n');
+                    document.getElementById('outputCount').textContent = 'Lines: ' + results.length;
+                    setProgress(100);
+                }
+            }
+
+            document.getElementById('outputText').value = '';
+            document.getElementById('outputCount').textContent = 'Lines: 0';
+            requestAnimationFrame(processChunk);
+        }
+
+        function resetWordBank() {
+            document.getElementById('wordBank').value = CAT_WORDS.join('\n');
+            updateWordCount();
+        }
+
+        function resetAll() {
+            resetWordBank();
+            document.getElementById('domainSuffix').value = 'portmathclasses.ccwu.cc';
+            document.getElementById('targetCount').value = '500';
+            document.getElementById('outputText').value = '';
+            document.getElementById('outputCount').textContent = 'Lines: 0';
+            document.getElementById('progressWrap').classList.remove('visible');
+            setProgress(0);
+        }
+
+        function copyToClipboard() {
+            const out = document.getElementById('outputText');
+            if (!out.value) return;
+            navigator.clipboard.writeText(out.value).then(() => {
+                const toast = document.getElementById('toastNotification');
+                toast.className = 'toast show';
+                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+            });
+        }
+
+        // Init
+        document.getElementById('wordBank').addEventListener('input', updateWordCount);
+        resetWordBank();
+    </script>
+    <script src="../header.js" data-base="../"></script>
+</body>
+</html>
