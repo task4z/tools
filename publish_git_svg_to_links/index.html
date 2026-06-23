@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDN Link Generator</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #00ff66;
+            --accent-hover: #00cc52;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-color: #2e2e2e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background-color: #151515;
+            color: #e0e0e0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 14px;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: #121212;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s ease;
+            margin-bottom: 2rem;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .results-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .results-container h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        .link-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .link-list li {
+            background: #151515;
+            margin-bottom: 8px;
+            padding: 12px;
+            border-left: 4px solid var(--accent-color);
+            border-radius: 0 4px 4px 0;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .link-list a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .link-list a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>CDN Link Generator</h2>
+        <p class="subtitle">Quickly generate alternate multi-CDN endpoint arrays from your open GitHub repository assets.</p>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="user">Username (u):</label>
+                <input type="text" id="user" value="task4z">
+            </div>
+
+            <div class="form-group">
+                <label for="repo">Repository (r):</label>
+                <input type="text" id="repo" value="classroom-15x">
+            </div>
+
+            <div class="form-group">
+                <label for="branch">Branch/Tag (b):</label>
+                <input type="text" id="branch" value="main">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="path">File Path (p):</label>
+                <input type="text" id="path" value="images/catclass_full.svg">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="folder">Sub-folder/Suffix (f):</label>
+                <input type="text" id="folder" value="" placeholder="Optional suffix...">
+            </div>
+        </div>
+
+        <button onclick="generateLinks()">Generate Links</button>
+
+        <div id="resultsContainer" class="results-container">
+            <h3>Generated URLs:</h3>
+            <ul id="linkList" class="link-list"></ul>
+        </div>
+    </div>
+
+    <script>
+    function generateLinks() {
+        const u = document.getElementById('user').value.trim();
+        const r = document.getElementById('repo').value.trim();
+        const b = document.getElementById('branch').value.trim();
+        const p = document.getElementById('path').value.trim();
+        const f = document.getElementById('folder').value.trim();
+
+        const container = document.getElementById('resultsContainer');
+        const list = document.getElementById('linkList');
+        
+        list.innerHTML = '';
+
+        const urls = [
+            `https://cdn.jsdelivr.net/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://quantil.jsdelivr.net/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://originfastly.jsdelivr.net/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://fastly.jsdelivr.net/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://gcore.jsdelivr.net/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://testingcf.jsdelivr.net/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://jsdelivr.b-cdn.net/gh/${u}/${r}@${b}/${p}${f}`,
+            
+            `https://esm.sh/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://cdn.esm.sh/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://raw.esm.sh/gh/${u}/${r}@${b}/${p}${f}`,
+            
+            `https://cdn.statically.io/gh/${u}/${r}@${b}/${p}${f}`,
+            `https://cdn.staticdelivr.com/gh/${u}/${r}/${b}/${p}${f}`,
+            
+            `https://raw.githack.com/${u}/${r}/${b}/${p}${f}`,
+            `https://rawcdn.githack.com/${u}/${r}/${b}/${p}${f}`
+        ];
+
+        urls.forEach(url => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.textContent = url;
+            li.appendChild(a);
+            list.appendChild(li);
+        });
+
+        container.style.display = 'block';
+    }
+    </script>
+    <script src="../header.js" data-base="../"></script>
+</body>
+</html>

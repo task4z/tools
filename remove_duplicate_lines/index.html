@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Deduplicator & Sorter</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #00ff66;
+            --accent-hover: #00cc52;
+            --danger-color: #ff4444;
+            --danger-hover: #cc3333;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-color: #2e2e2e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .line-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Options Panel */
+        .options-panel {
+            background-color: #181818;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .options-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        input[type="radio"], input[type="checkbox"] {
+            accent-color: var(--accent-color);
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Text Area elements */
+        textarea {
+            width: 100%;
+            height: 200px;
+            background-color: #151515;
+            color: #e0e0e0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        /* Action Buttons */
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-action {
+            background-color: var(--accent-color);
+            color: #121212;
+        }
+
+        .btn-action:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-secondary {
+            background-color: #333333;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #444444;
+        }
+
+        /* Toast feedback */
+        .toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 12px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Lines Sorter & Duplicate Remover</h2>
+        <p class="subtitle">Paste lists of raw proxies, domains, configuration files, or text to filter out redundancies instantly.</p>
+
+        <div class="options-panel">
+            <div class="options-title">Sorting Rules & Controls</div>
+            <div class="options-row">
+                <label class="radio-group">
+                    <input type="radio" name="sortType" value="none" checked> Don't Sort Results
+                </label>
+                <label class="radio-group">
+                    <input type="radio" name="sortType" value="alphabetical"> Alphabetical Sort
+                </label>
+                <label class="radio-group">
+                    <input type="radio" name="sortType" value="ascii"> ASCII Sort
+                </label>
+                <label class="checkbox-group">
+                    <input type="checkbox" id="reverseSort"> Reverse Sorting (Z-A / 9-0)
+                </label>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <span>Paste Text Lines Below</span>
+            <span class="line-count" id="inputCount">Lines: 0</span>
+        </div>
+        <textarea id="inputText" placeholder="Paste your text strings here...&#10;Each item must be on a new line."></textarea>
+
+        <div class="btn-group">
+            <button class="btn-action" onclick="processText()">Remove Duplicate Lines & Sort</button>
+            <button class="btn-danger" onclick="resetForm()">Reset All</button>
+        </div>
+
+        <div class="section-title">
+            <span>Processed Output Text</span>
+            <span class="line-count" id="outputCount">Lines: 0</span>
+        </div>
+        <textarea id="outputText" readonly placeholder="Your clean deduplicated text array will render here..."></textarea>
+
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <div id="toastNotification" class="toast">Copied to clipboard!</div>
+
+    <script>
+        // Track live element text character array lengths
+        const inputTextArea = document.getElementById('inputText');
+        
+        inputTextArea.addEventListener('input', () => {
+            const lines = inputTextArea.value.split('\n').filter(line => line.trim() !== "");
+            document.getElementById('inputCount').innerText = `Lines: ${lines.length}`;
+        });
+
+        function processText() {
+            const rawInput = inputTextArea.value;
+            if (!rawInput.trim()) return;
+
+            // Split into clean individual array rows, omitting trailing clear lines
+            let linesArray = rawInput.split('\n').map(line => line.trim()).filter(line => line !== "");
+
+            // Deduplicate processing mapping logic via Object Sets
+            linesArray = [...new Set(linesArray)];
+
+            // Extract execution states from control variables
+            const sortType = document.querySelector('input[name="sortType"]:checked').value;
+            const isReverse = document.getElementById('reverseSort').checked;
+
+            // Apply designated algorithmic transformations
+            if (sortType === 'alphabetical') {
+                linesArray.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }));
+            } else if (sortType === 'ascii') {
+                linesArray.sort();
+            }
+
+            if (isReverse) {
+                linesArray.reverse();
+            }
+
+            // Render back onto display viewports
+            document.getElementById('outputText').value = linesArray.join('\n');
+            document.getElementById('outputCount').innerText = `Lines: ${linesArray.length}`;
+        }
+
+        function resetForm() {
+            inputTextArea.value = '';
+            document.getElementById('outputText').value = '';
+            document.getElementById('inputCount').innerText = 'Lines: 0';
+            document.getElementById('outputCount').innerText = 'Lines: 0';
+            document.getElementById('reverseSort').checked = false;
+            document.querySelector('input[name="sortType"][value="none"]').checked = true;
+        }
+
+        function copyToClipboard() {
+            const outputBox = document.getElementById('outputText');
+            if (!outputBox.value) return;
+
+            outputBox.select();
+            outputBox.setSelectionRange(0, 99999); // Mobile compliance support
+
+            navigator.clipboard.writeText(outputBox.value).then(() => {
+                const toast = document.getElementById('toastNotification');
+                toast.className = "toast show";
+                setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+            });
+        }
+    </script>
+    <script src="../header.js" data-base="../"></script>
+</body>
+</html>
